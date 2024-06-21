@@ -2,6 +2,7 @@
 // Licensed under the MIT License - https://opensource.org/licenses/MIT
 
 #include <docxbox/helper/helper_file.h>
+#include <filesystem>
 
 namespace helper {
 
@@ -14,7 +15,7 @@ bool File::IsDir(const std::string& path) {
 }
 
 bool File::FileExists(const std::string &path_file) {
-  return access(path_file.c_str(), F_OK) != -1;
+    return std::filesystem::exists(path_file);
 }
 
 bool File::GetFileContents(const std::string &path_file,
@@ -149,52 +150,11 @@ bool File::Remove(const char *path) {
 }
 
 bool File::RemoveRecursive(const char *path) {
-  if (!IsDir(path)) return Remove(path);
-
-  DIR *d = opendir(path);
-  size_t path_len = strlen(path);
-
-  int result = -1;
-
-  if (d) {
-    struct dirent *p;
-
-    result = 0;
-    while (!result && (p=readdir(d))) {
-      int r2 = -1;
-      char *buffer;
-      size_t len;
-
-      if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, ".."))
-        continue;
-
-      len = path_len + strlen(p->d_name) + 2;
-      buffer = static_cast<char *>(malloc(len));
-
-      if (buffer) {
-        struct stat stat_buffer{};
-
-        snprintf(buffer, len, "%s/%s", path, p->d_name);
-
-        if (!stat(buffer, &stat_buffer)) {
-          if (S_ISDIR(stat_buffer.st_mode))
-            r2 = RemoveRecursive(buffer);
-          else
-            r2 = unlink(buffer);
-        }
-
-        free(buffer);
-      }
-
-      result = r2;
+    if (!File::IsDir(path)) {
+        Remove(path);
     }
-
-    closedir(d);
-  }
-
-  if (!result) result = rmdir(path);
-
-  return result;
+    auto removed = std::filesystem::remove_all(path);
+    return removed == 0;
 }
 
 std::string File::GetLastPathSegment(std::string path) {

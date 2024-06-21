@@ -3,10 +3,10 @@
 
 #include <docxbox/helper/helper_string.h>
 
-#include <iostream>
 #include <iterator>
 #include <regex>  // NOLINT [build/c++11]
 #include <utility>
+#include <string>
 
 namespace helper {
 
@@ -346,23 +346,17 @@ std::string String::RenderTwoColumns(
 
 // Trim from start (in place)
 void String::LTrim(std::string *s) {
-  (*s).erase(
-      (*s).begin(),
-      std::find_if(
-          (*s).begin(),
-          (*s).end(),
-          std::not1(std::ptr_fun<int, int>(std::isspace))));
+    // trim the string from the start
+    s->erase(s->begin(), std::find_if(s->begin(), s->end(), [](unsigned char ch) {
+                return !std::isspace(ch);
+            }));
 }
 
 // Trim from end (in place)
 void String::RTrim(std::string *s) {
-  (*s).erase(
-      std::find_if(
-          (*s).rbegin(),
-          (*s).rend(),
-          std::not1(std::ptr_fun<int, int>(std::isspace)))
-          .base(),
-      (*s).end());
+    s->erase(std::find_if(s->rbegin(), s->rend(), [](unsigned char ch) {
+                return !std::isspace(ch);
+             }).base(), s->end());
 }
 
 // Trim from both ends (in place)

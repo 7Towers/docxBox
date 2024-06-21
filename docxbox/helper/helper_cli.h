@@ -7,7 +7,6 @@
 #include <docxbox/helper/helper_numeric.h>
 
 #include <fcntl.h>
-#include <sys/sendfile.h>
 
 #include <algorithm>
 #include <codecvt>
